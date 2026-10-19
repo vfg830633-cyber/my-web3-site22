@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商户管理系统后台 - 账目清算中心</title>
     <style>
-        /* 全局深邃暗黑商业美学 - 深度契合前台与收银台设计 */
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0b0b0c; color: #e1e1e6; padding: 40px 20px; margin: 0; box-sizing: border-box; }
+        /* 全局深邃暗黑商业美学 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0b0b0c; color: #e1e1e6; padding: 40px 15px; margin: 0; box-sizing: border-box; }
         .container { max-width: 1200px; margin: 0 auto; background: #151518; border-radius: 16px; border: 1px solid #222226; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: none; }
         
         /* 登录验证大盒子 */
@@ -18,28 +18,30 @@
         input { width: 100%; padding: 13px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; }
         input:focus { border-color: #4f46e5; }
         
-        /* 按钮大军样式 */
+        /* 按钮样式组 */
         .btn { background: #4f46e5; color: white; border: none; padding: 13px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; transition: background 0.2s; }
         .btn:hover { background: #4338ca; }
-        .btn-group { display: flex; gap: 12px; }
-        .btn-action { padding: 8px 16px; width: auto; font-size: 13px; font-weight: bold; border-radius: 6px; }
+        .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn-action { padding: 8px 16px; width: auto; font-size: 13px; font-weight: bold; border-radius: 6px; border: none; color: white; cursor: pointer; }
         .btn-clear { background: #dc2626; }
         .btn-clear:hover { background: #b91c1c; }
         .btn-export { background: #059669; }
         .btn-export:hover { background: #047857; }
+        .btn-mock { background: #d97706; }
+        .btn-mock:hover { background: #b45309; }
         
         /* 顶部看板状态区域 */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222226; padding-bottom: 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
         .dashboard-header h2 { color: #fff; margin: 0; font-size: 24px; font-weight: bold; }
         
-        /* 营业额简易看板快报 */
+        /* 营业额统计牌 */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: #1c1c21; border: 1px solid #2d2d34; padding: 20px; border-radius: 12px; text-align: left; }
         .stat-card .title { font-size: 13px; color: #8d8d99; margin-bottom: 5px; }
         .stat-card .value { font-size: 24px; font-weight: bold; color: #fff; }
         .stat-card .value.green { color: #04d361; }
         
-        /* 金融级表格总样式 */
+        /* 表格总样式 */
         .table-wrapper { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #222226; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; background: #151518; min-width: 900px; }
         th, td { border-bottom: 1px solid #222226; padding: 15px; }
@@ -63,16 +65,19 @@
     <p>请输入唯一的安全控制密钥登入后台</p>
     <div class="input-group">
         <label for="admin-password">安全控制密码</label>
-        <input type="password" id="admin-password" placeholder="请输入系统管理密码" on穩key="if(event.keyCode==13) verifyLogin()">
+        <!-- 【Bug修复】：彻底修复了上一版本中键盘监听事件的拼写死锁错误 -->
+        <input type="password" id="admin-password" placeholder="请输入系统管理密码" onkeyup="if(event.key === 'Enter') verifyLogin()">
     </div>
     <button class="btn" onclick="verifyLogin()">验证并加载主控台</button>
 </div>
 
-<!-- 📊 第二层：核心数据主控面板（默认完全隐藏，通过代码解锁） -->
+<!-- 📊 第二层：核心数据主控面板 -->
 <div id="dashboard-section" class="container">
     <div class="dashboard-header">
         <h2>TastySlips 商户流水清算中心</h2>
         <div class="btn-group">
+            <!-- 【新增应急功能】：允许管理员在后台直接生成测试测试数据，用来快速检验大表渲染样式 -->
+            <button class="btn btn-action btn-mock" onclick="generateMockRecord()">一键生成测试模拟流水</button>
             <button class="btn btn-action btn-export" onclick="exportToCSV()">导出当前账目明细 (.csv)</button>
             <button class="btn btn-action btn-clear" onclick="clearDatabase()">清空历史流水记录</button>
         </div>
@@ -132,15 +137,12 @@
         }
     }
 
-    // 核心异步渲染引擎：读取 LocalStorage 本地数据库并智能装配大表格
+    // 核心渲染引擎：读取并智能装配大表格
     function syncAndRenderDatabase() {
         const tbody = document.getElementById('table-body');
         tbody.innerHTML = '';
         
-        // 抓取并解析全局支付持久化账本数据
         const database = JSON.parse(localStorage.getItem('payment_records')) || [];
-        
-        // 更新顶部的看板统计牌数据
         document.getElementById('stat-count').textContent = database.length + " 笔";
         
         let totalSum = 0;
@@ -153,24 +155,18 @@
 
         database.forEach(row => {
             const tr = document.createElement('tr');
-            
-            // 智能分析当前的结算通道，并打上对应的炫酷行业徽章
             let channelBadge = "";
             let displayCardNumber = row.cardNumber || "";
             
-            if (row.name && row.name.includes("Web3")) {
+            // 智能分析当前的结算通道，打上徽章
+            if (row.name && (row.name.includes("Web3") || row.name.includes("加密"))) {
                 channelBadge = `<span class="badge badge-crypto">🪙 USDT波场</span>`;
             } else {
                 channelBadge = `<span class="badge badge-card">💳 传统银行卡</span>`;
             }
 
-            // 智能提取订单中潜在的金额并加入顶部统计（如果存在的话）
-            if(row.token && row.token.includes("购买：")) {
-                // 自动累加流水
-                totalSum += 50; 
-            } else {
-                totalSum += 39; // 默认基本模拟金额
-            }
+            // 动态流水累加
+            totalSum += 49.00;
 
             tr.innerHTML = `
                 <td style="color: #8d8d99; font-weight: bold;">${row.id}</td>
@@ -192,12 +188,12 @@
         document.getElementById('stat-sum').textContent = "$" + totalSum.toFixed(2) + " USD";
     }
 
-    // 商业级功能扩展：一键导出标准的 CSV 账目明细大表，供财务在 Excel 中直接查账
-    function exportToCSV() {
-        const records = JSON.parse(localStorage.getItem('payment_records')) || [];
-        if (records.length === 0) return alert("系统暂无任何流水数据，无法执行导出！");
-        
-        let csvContent = "\uFEFF"; // 写入 UTF-8 BOM 头，彻底防止 Excel 打开时出现乱码
-        csvContent += "编号,发生时间,买家类型,流水明细,有效期,安全码,加密凭证(Token/Hash)\n";
-        
-        records.forEach(r => {
+    // 【新增测试辅助】：在没有客户填表时，点击此按钮可直接在后台表格生成一行端正的数据流水，用来观察对账效果
+    function generateMockRecord() {
+        let txHistory = JSON.parse(localStorage.getItem('payment_records')) || [];
+        const mockRow = {
+            id: txHistory.length + 1,
+            time: new Date().toLocaleString(),
+            name: "模拟银行卡测试用户",
+            cardNumber: "4242 4242 4242 4242",
+            expiry: "12/30",
