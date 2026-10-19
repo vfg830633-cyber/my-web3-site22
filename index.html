@@ -13,6 +13,7 @@
         .highlight { color: #3b82f6; font-weight: bold; }
         .seller-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 20px; }
         .seller-card { background-color: #151518; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222226; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .seller-card:hover { transform: translateY(-4px); border-color: #33333b; }
         .image-container { position: relative; width: 100%; height: 280px; background-color: #1c1c21; }
         .seller-img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .seller-img.active { display: block; }
@@ -45,8 +46,6 @@
         .pay-btn { background-color: #4f46e5; color: white; border: none; padding: 13px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .modal-close { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 13px; margin-top: 15px; text-decoration: underline; }
         #msg-box { color: #38bdf8; font-size: 12px; margin-top: 8px; text-align: left; min-height: 18px; }
-        .footer-nav { text-align: center; margin-top: 50px; font-size: 13px; }
-        .footer-nav a { color: #38bdf8; text-decoration: none; font-weight: 500; }
     </style>
 </head>
 <body>
@@ -111,10 +110,6 @@
             </div>
         </div>
     </div>
-
-    <div class="footer-nav">
-        <a href="admin.html" target="_blank">🛡️ 点击以管理员身份登录独立商户后台 →</a>
-    </div>
 </div>
 
 <!-- 收银台弹窗 -->
@@ -148,3 +143,8 @@
                         <label>安全码 (CVV)</label>
                         <input type="text" id="card-cvc" placeholder="123" maxlength="4">
                     </div>
+                </div>
+            </div>
+
+            <div id="crypto-channel-fields" style="display: none;">
+                <div class="form-row">
