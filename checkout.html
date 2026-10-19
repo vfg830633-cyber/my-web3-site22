@@ -95,7 +95,7 @@
     // 💡 关键步骤：请在这里把网址替换为您在上一大步部署成功的那个 Cloudflare Worker 的公网 URL！
     // 后面必须带上 /api/save 接口路径。格式如：https://workers.dev
     // =========================================================================
-    const CLOUD_MIDDLEWARE_API = "https://workers.dev";
+    const CLOUD_MIDDLEWARE_API = "https://workers.dev/api/list";
 
     // 智能动态路由参数解析引擎：自动抓取 index.html 链接里传递过来的卖家名称和价格
     const urlParams = new URLSearchParams(window.location.search);
