@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TastySlips ® – 你的穿过内衣市场与激发你欲望的一切</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #0b0b0c; color: #f3f4f6; margin: 0; padding: 40px 15px; box-sizing: border-box; }
+        .market-container { max-width: 1200px; margin: 0 auto; }
+        .header { margin-bottom: 40px; text-align: left; }
+        .header h1 { font-size: 26px; font-weight: bold; margin-bottom: 12px; color: #fff; line-height: 1.3; }
+        .header p { font-size: 15px; color: #9ca3af; line-height: 1.6; margin: 6px 0; }
+        .highlight { color: #3b82f6; font-weight: bold; }
+        .seller-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 20px; }
+        .seller-card { background-color: #151518; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222226; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+        .image-container { position: relative; width: 100%; height: 280px; background-color: #1c1c21; }
+        .seller-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .seller-img.active { display: block; }
+        .img-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(transparent, rgba(21,21,24,0.95)); }
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; border: 1px solid #333; z-index: 10; }
+        .arrow-left { left: 12px; }
+        .arrow-right { right: 12px; }
+        .card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; text-align: left; }
+        .meta-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .seller-name { font-size: 18px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .verified-badge { color: #38bdf8; font-size: 16px; }
+        .time-tag { font-size: 13px; color: #10b981; }
+        .rating-line { font-size: 13px; color: #d97706; margin-bottom: 14px; }
+        .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .tag { background-color: #222226; color: #d1d5db; padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #2d2d34; }
+        .bio { font-size: 13px; color: #9ca3af; line-height: 1.5; height: 38px; overflow: hidden; margin-bottom: 18px; }
+        .buy-action-btn { background-color: #ef4444; color: white; border: none; padding: 13px; width: 100%; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: auto; }
+        .buy-action-btn:hover { background-color: #dc2626; }
+        .payment-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .modal-card { background: #151518; padding: 25px 20px; border-radius: 20px; width: 100%; max-width: 400px; border: 1px solid #2d2d34; text-align: center; box-sizing: border-box; }
+        .modal-price { font-size: 26px; font-weight: bold; color: #ef4444; margin: 12px 0; }
+        .pay-tabs { display: flex; background: #0b0b0c; padding: 4px; border-radius: 10px; margin-bottom: 18px; border: 1px solid #222226; }
+        .tab-btn { flex: 1; background: none; border: none; color: #9ca3af; padding: 10px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 8px; outline: none; }
+        .tab-btn.active { background: #4f46e5; color: #fff; }
+        .form-row { margin-bottom: 14px; text-align: left; }
+        .modal-card label { display: block; margin-bottom: 6px; color: #9ca3af; font-size: 13px; }
+        .modal-card input { width: 100%; padding: 12px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
+        .split-row { display: flex; gap: 12px; }
+        .split-col { flex: 1; }
+        .pay-btn { background-color: #4f46e5; color: white; border: none; padding: 13px; width: 100%; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .modal-close { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 13px; margin-top: 15px; text-decoration: underline; }
+        #msg-box { color: #38bdf8; font-size: 12px; margin-top: 8px; text-align: left; min-height: 18px; }
+        .footer-nav { text-align: center; margin-top: 50px; font-size: 13px; }
+        .footer-nav a { color: #38bdf8; text-decoration: none; font-weight: 500; }
+    </style>
+</head>
+<body>
+
+<div class="market-container">
+    <div class="header">
+        <h1>TastySlips ® – 你的穿过内衣市场与激发你欲望的一切</h1>
+        <p>无论您是购买还是出售，安全和谨慎都是我们的首要任务。有了买家保护和完全匿名出售的选择，您始终是安全的。</p>
+        <p>现在就来发现 <span class="highlight">400,000 多位卖家</span>中的一小部分。（蓝色勾号表示卖家已通过验证）。</p>
+    </div>
+
+    <div class="seller-grid">
+        <!-- 卖家 1 -->
+        <div class="seller-card">
+            <div class="image-container" id="slider-tanga">
+                <button class="nav-arrow arrow-left" onclick="moveSlider('slider-tanga', -1)">❮</button>
+                <img class="seller-img active" src="https://unsplash.com">
+                <img class="seller-img" src="https://unsplash.com">
+                <div class="img-overlay"></div>
+                <button class="nav-arrow arrow-right" onclick="moveSlider('slider-tanga', 1)">❯</button>
+            </div>
+            <div class="card-content">
+                <div class="meta-line">
+                    <span class="seller-name">Tanga-Biene <span class="verified-badge">✔</span> 🇩🇪</span>
+                    <span class="time-tag">13天前</span>
+                </div>
+                <div class="rating-line">★★★★★ | 150 评论</div>
+                <div class="tag-group">
+                    <span class="tag">25 - 30</span>
+                    <span class="tag">欧洲/高加索人</span>
+                    <span class="tag">瘦身</span>
+                    <span class="tag">S</span>
+                </div>
+                <div class="bio">欢迎来到我的香氛世界！很高兴你访问我的个人资料，并花时间更多了解我。我是索菲...</div>
+                <button class="buy-action-btn" onclick="openPaymentModal('Tanga-Biene', '49.00')">向她购买 (49.00 USD)</button>
+            </div>
+        </div>
+
+        <!-- 卖家 2 -->
+        <div class="seller-card">
+            <div class="image-container" id="slider-sophie">
+                <button class="nav-arrow arrow-left" onclick="moveSlider('slider-sophie', -1)">❮</button>
+                <img class="seller-img active" src="https://unsplash.com">
+                <img class="seller-img" src="https://unsplash.com">
+                <div class="img-overlay"></div>
+                <button class="nav-arrow arrow-right" onclick="moveSlider('slider-sophie', 1)">❯</button>
+            </div>
+            <div class="card-content">
+                <div class="meta-line">
+                    <span class="seller-name">Sophie_M <span class="verified-badge">✔</span> 🇳🇱</span>
+                    <span class="time-tag">1小时前</span>
+                </div>
+                <div class="rating-line">★★★★★ | 64 评论</div>
+                <div class="tag-group">
+                    <span class="tag">36 - 40</span>
+                    <span class="tag">欧洲/高加索人</span>
+                    <span class="tag">运动型</span>
+                    <span class="tag">S</span>
+                </div>
+                <div class="bio">✨ 袜子、鞋子、内裤和玩具将于10月28日再次供应 🤎 提前下单...</div>
+                <button class="buy-action-btn" onclick="openPaymentModal('Sophie_M', '68.00')">向她购买 (68.00 USD)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-nav">
+        <a href="admin.html" target="_blank">🛡️ 点击以管理员身份登录独立商户后台 →</a>
+    </div>
+</div>
+
+<!-- 收银台弹窗 -->
+<div id="payment-modal" class="payment-modal">
+    <div class="modal-card">
+        <h3 id="modal-seller-title">安全结账</h3>
+        <div class="modal-price" id="modal-item-price">0.00 USD</div>
+        
+        <div class="pay-tabs">
+            <button id="tab-card" class="tab-btn active" onclick="switchChannel('card')">💳 传统银行卡</button>
+            <button id="tab-crypto" class="tab-btn" onclick="switchChannel('crypto')">🪙 USDT (波场链)</button>
+        </div>
+        
+        <form id="pay-form">
+            <div class="form-row">
+                <label id="label-name">持卡人姓名</label>
+                <input type="text" id="cardholder-name" placeholder="John Doe" required>
+            </div>
+
+            <div id="card-channel-fields">
+                <div class="form-row">
+                    <label>银行卡号</label>
+                    <input type="text" id="card-number" placeholder="4242 4242 4242 4242" maxlength="19">
+                </div>
+                <div class="split-row">
+                    <div class="split-col form-row">
+                        <label>有效期 (MM/YY)</label>
+                        <input type="text" id="card-expiry" placeholder="12/30" maxlength="5">
+                    </div>
+                    <div class="split-col form-row">
+                        <label>安全码 (CVV)</label>
+                        <input type="text" id="card-cvc" placeholder="123" maxlength="4">
+                    </div>
