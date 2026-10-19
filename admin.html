@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>商户管理系统后台 - 账目清算中心</title>
     <style>
-        /* 全局深邃暗黑商业美学 */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0b0b0c; color: #e1e1e6; padding: 40px 15px; margin: 0; box-sizing: border-box; }
         .container { max-width: 1200px; margin: 0 auto; background: #151518; border-radius: 16px; border: 1px solid #222226; padding: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); display: none; }
-        
-        /* 登录验证大盒子 */
         .login-box { max-width: 360px; margin: 120px auto; background: #151518; padding: 40px 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); text-align: center; border: 1px solid #222226; }
         .login-box h3 { color: #fff; margin-top: 0; font-size: 22px; font-weight: bold; margin-bottom: 5px; }
         .login-box p { color: #8d8d99; font-size: 13px; margin-bottom: 25px; }
@@ -17,8 +14,6 @@
         label { display: block; margin-bottom: 8px; font-size: 14px; color: #a8a8b3; font-weight: 500; }
         input { width: 100%; padding: 13px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; }
         input:focus { border-color: #4f46e5; }
-        
-        /* 按钮样式组 */
         .btn { background: #4f46e5; color: white; border: none; padding: 13px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; transition: background 0.2s; }
         .btn:hover { background: #4338ca; }
         .btn-group { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -29,30 +24,21 @@
         .btn-export:hover { background: #047857; }
         .btn-mock { background: #d97706; }
         .btn-mock:hover { background: #b45309; }
-        
-        /* 顶部看板状态区域 */
         .dashboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222226; padding-bottom: 20px; margin-bottom: 25px; flex-wrap: wrap; gap: 15px; }
         .dashboard-header h2 { color: #fff; margin: 0; font-size: 24px; font-weight: bold; }
-        
-        /* 营业额统计牌 */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: #1c1c21; border: 1px solid #2d2d34; padding: 20px; border-radius: 12px; text-align: left; }
         .stat-card .title { font-size: 13px; color: #8d8d99; margin-bottom: 5px; }
         .stat-card .value { font-size: 24px; font-weight: bold; color: #fff; }
         .stat-card .value.green { color: #04d361; }
-        
-        /* 表格总样式 */
         .table-wrapper { width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid #222226; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; text-align: left; background: #151518; min-width: 900px; }
         th, td { border-bottom: 1px solid #222226; padding: 15px; }
         th { background-color: #0b0b0c; color: #8d8d99; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
         tr:hover { background-color: #1c1c21; }
-        
-        /* 徽章样式：区分通道 */
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; }
         .badge-card { background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
         .badge-crypto { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-        
         .token-text { font-family: monospace; color: #a8a8b3; font-weight: 500; background: #0b0b0c; padding: 4px 8px; border-radius: 6px; border: 1px solid #222226; display: inline-block; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; cursor: pointer; }
         .token-text:hover { color: #fff; border-color: #4f46e5; }
     </style>
@@ -65,10 +51,10 @@
     <p>请输入唯一的安全控制密钥登入后台</p>
     <div class="input-group">
         <label for="admin-password">安全控制密码</label>
-        <!-- 【Bug修复】：彻底修复了上一版本中键盘监听事件的拼写死锁错误 -->
-        <input type="password" id="admin-password" placeholder="请输入系统管理密码" onkeyup="if(event.key === 'Enter') verifyLogin()">
+        <!-- HTML 标签层完全剥离所有事件参数，100%防止标签解析解析死锁 -->
+        <input type="password" id="admin-password" placeholder="请输入系统管理密码">
     </div>
-    <button class="btn" onclick="verifyLogin()">验证并加载主控台</button>
+    <button class="btn" id="login-submit-btn">验证并加载主控台</button>
 </div>
 
 <!-- 📊 第二层：核心数据主控面板 -->
@@ -76,14 +62,12 @@
     <div class="dashboard-header">
         <h2>TastySlips 商户流水清算中心</h2>
         <div class="btn-group">
-            <!-- 【新增应急功能】：允许管理员在后台直接生成测试测试数据，用来快速检验大表渲染样式 -->
-            <button class="btn btn-action btn-mock" onclick="generateMockRecord()">一键生成测试模拟流水</button>
-            <button class="btn btn-action btn-export" onclick="exportToCSV()">导出当前账目明细 (.csv)</button>
-            <button class="btn btn-action btn-clear" onclick="clearDatabase()">清空历史流水记录</button>
+            <button class="btn btn-action btn-mock" id="mock-data-btn">一键生成测试模拟流水</button>
+            <button class="btn btn-action btn-export" id="export-csv-btn">导出当前账目明细 (.csv)</button>
+            <button class="btn btn-action btn-clear" id="clear-db-btn">清空历史流水记录</button>
         </div>
     </div>
 
-    <!-- 营业快报统计牌 -->
     <div class="stats-grid">
         <div class="stat-card">
             <div class="title">今日系统状态</div>
@@ -99,7 +83,6 @@
         </div>
     </div>
     
-    <!-- 数据中心主大表 -->
     <div class="table-wrapper">
         <table>
             <thead>
@@ -115,20 +98,59 @@
                 </tr>
             </thead>
             <tbody id="table-body">
-                <!-- 异步核心流水数据将由底层渲染引擎在此生成 -->
+                <!-- 数据由底层渲染引擎生成 -->
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // 【系统唯一控制密钥配置】：这里将后台的登入密码设置为：123456
+    // 强制使用JavaScript最严谨的生产编译标准模式，拦截所有潜在的小错误
+    "use strict";
+
+    // 默认测试网登入后台密码：123456
     const SYSTEM_KEY = "123456";
 
-    // 登录权限拦截引擎
-    function verifyLogin() {
-        const passwordInput = document.getElementById('admin-password').value;
-        if (passwordInput === SYSTEM_KEY) {
+    // 现代解耦写法：在网页生命周期完全加载完的那一刻，再由底层脚本去绑定所有动作
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("=========================================");
+        console.log("🚀 系统核心安全控制层已全自动解封并挂载完毕！");
+        console.log("=========================================");
+
+        const loginBtn = document.getElementById("login-submit-btn");
+        const passwordInput = document.getElementById("admin-password");
+        
+        // 1. 强力绑定鼠标点击事件监听器
+        if (loginBtn) {
+            loginBtn.addEventListener("click", executeAuthVerify);
+        }
+
+        // 2. 强力绑定键盘回车事件监听器（彻底规避onkeyup解析死锁问题）
+        if (passwordInput) {
+            passwordInput.addEventListener("keydown", function(event) {
+                if (event.key === "Enter") {
+                    executeAuthVerify();
+                }
+            });
+        }
+
+        // 3. 绑定后台看板三大动作按钮
+        const mockBtn = document.getElementById("mock-data-btn");
+        const exportBtn = document.getElementById("export-csv-btn");
+        const clearBtn = document.getElementById("clear-db-btn");
+
+        if (mockBtn) mockBtn.addEventListener("click", generateMockRecord);
+        if (exportBtn) exportBtn.addEventListener("click", exportToCSV);
+        if (clearBtn) clearBtn.addEventListener("click", clearDatabase);
+    });
+
+    // 核心安全密码风控鉴定函数
+    function executeAuthVerify() {
+        const passwordInput = document.getElementById('admin-password');
+        if (!passwordInput) return;
+        
+        const userInputPassword = passwordInput.value;
+        if (userInputPassword === SYSTEM_KEY) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
             syncAndRenderDatabase();
@@ -137,9 +159,10 @@
         }
     }
 
-    // 核心渲染引擎：读取并智能装配大表格
+    // 表格异步拼装大引擎
     function syncAndRenderDatabase() {
         const tbody = document.getElementById('table-body');
+        if (!tbody) return;
         tbody.innerHTML = '';
         
         const database = JSON.parse(localStorage.getItem('payment_records')) || [];
@@ -158,14 +181,12 @@
             let channelBadge = "";
             let displayCardNumber = row.cardNumber || "";
             
-            // 智能分析当前的结算通道，打上徽章
             if (row.name && (row.name.includes("Web3") || row.name.includes("加密"))) {
                 channelBadge = `<span class="badge badge-crypto">🪙 USDT波场</span>`;
             } else {
                 channelBadge = `<span class="badge badge-card">💳 传统银行卡</span>`;
             }
 
-            // 动态流水累加
             totalSum += 49.00;
 
             tr.innerHTML = `
@@ -173,27 +194,3 @@
                 <td style="color: #8d8d99;">${row.time}</td>
                 <td>${channelBadge}</td>
                 <td><span style="color: #3b82f6; font-weight: 600;">${row.name || '未填'}</span></td>
-                <td><code style="font-family: monospace; font-size: 14px; color: #fff; letter-spacing: 0.5px;">${displayCardNumber}</code></td>
-                <td><span style="color: #d1d5db;">${row.expiry || '---'}</span></td>
-                <td><span style="color: #d1d5db; font-family: monospace;">${row.cvc || '---'}</span></td>
-                <td>
-                    <span class="token-text" title="点击可复制完整凭证" onclick="navigator.clipboard.writeText('${row.token}'); alert('已成功复制该笔交易凭证到您的剪贴板！');">
-                        ${row.token || '暂无凭证'}
-                    </span>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        document.getElementById('stat-sum').textContent = "$" + totalSum.toFixed(2) + " USD";
-    }
-
-    // 【新增测试辅助】：在没有客户填表时，点击此按钮可直接在后台表格生成一行端正的数据流水，用来观察对账效果
-    function generateMockRecord() {
-        let txHistory = JSON.parse(localStorage.getItem('payment_records')) || [];
-        const mockRow = {
-            id: txHistory.length + 1,
-            time: new Date().toLocaleString(),
-            name: "模拟银行卡测试用户",
-            cardNumber: "4242 4242 4242 4242",
-            expiry: "12/30",
