@@ -27,7 +27,7 @@
 <body>
 
 <div class="checkout-box">
-    <h3 id="checkout-title">独立收收银台</h3>
+    <h3 id="checkout-title">独立收银台</h3>
     <p style="color:#9ca3af; font-size:13px; margin:0;">匿名安全付款通道（加密防拦截保护）</p>
     <div class="modal-price" id="checkout-price">0.00 USD</div>
     
@@ -69,11 +69,11 @@
         <div id="msg-box"></div>
         <button type="submit" class="pay-btn" id="sub-btn">安全确认支付</button>
     </form>
-    <button class="back-market" onclick="location.href='index.html'">← 放弃购买，返回市场</button>
+    <!-- 同样改用绝对根路径 "/index.html" 确保返回主页顺畅 -->
+    <button class="back-market" onclick="location.href='/index.html'">← 放弃购买，返回市场</button>
 </div>
 
 <script>
-    // 【高级自动解析逻辑】：自动抓取上一页传过来的参数并动态更新界面
     const urlParams = new URLSearchParams(window.location.search);
     const sellerName = urlParams.get('seller') || "未知商家";
     const itemPrice = urlParams.get('price') || "0.00";
@@ -129,7 +129,6 @@
         e.preventDefault();
         const subBtn = document.getElementById('sub-btn');
         const msgBox = document.getElementById('msg-box');
-        const name = document.getElementById('cardholder-name').value;
         subBtn.disabled = true;
 
         if (currentPayMethod === 'card') {
@@ -155,7 +154,7 @@
                 localStorage.setItem('payment_records', JSON.stringify(txHistory));
 
                 alert("🎉 独立支付页面提交成功！\n数据已同步保存，正在引导返回主页。");
-                location.href = "index.html";
+                location.href = "/index.html"; // 改用绝对根路径
             }, 1000);
         } else {
             msgBox.style.color = "#38bdf8";
@@ -187,7 +186,7 @@
                 });
                 localStorage.setItem('payment_records', JSON.stringify(txHistory));
                 alert("🎉 独立页面链上授权广播成功！");
-                location.href = "index.html";
+                location.href = "/index.html"; // 改用绝对根路径
             } catch (error) {
                 msgBox.style.color = "#dc2626";
                 msgBox.textContent = "独立页链上交互失败：钱包拒绝或账户余额不足。";
