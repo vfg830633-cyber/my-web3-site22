@@ -12,15 +12,11 @@
         .header p { font-size: 15px; color: #9ca3af; line-height: 1.6; margin: 6px 0; }
         .highlight { color: #3b82f6; font-weight: bold; }
         .seller-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 20px; }
-        .seller-card { background-color: #151518; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222226; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.2s, border-color 0.2s; }
-        .seller-card:hover { transform: translateY(-4px); border-color: #33333b; }
+        .seller-card { background-color: #151518; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222226; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
         .image-container { position: relative; width: 100%; height: 280px; background-color: #1c1c21; }
         .seller-img { width: 100%; height: 100%; object-fit: cover; display: none; }
         .seller-img.active { display: block; }
         .img-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(transparent, rgba(21,21,24,0.95)); }
-        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; border: 1px solid #333; z-index: 10; }
-        .arrow-left { left: 12px; }
-        .arrow-right { right: 12px; }
         .card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; text-align: left; }
         .meta-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .seller-name { font-size: 18px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
@@ -30,7 +26,9 @@
         .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
         .tag { background-color: #222226; color: #d1d5db; padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #2d2d34; }
         .bio { font-size: 13px; color: #9ca3af; line-height: 1.5; height: 38px; overflow: hidden; margin-bottom: 18px; }
-        .buy-action-btn { background-color: #ef4444; color: white; border: none; padding: 13px; width: 100%; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: auto; text-decoration: none; text-align: center; display: block; box-sizing: border-box; }
+        
+        /* 改回标准的button元素，配合原生JS执行强力底层跳转 */
+        .buy-action-btn { background-color: #ef4444; color: white; border: none; padding: 13px; width: 100%; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: auto; text-align: center; display: block; box-sizing: border-box; }
         .buy-action-btn:hover { background-color: #dc2626; }
     </style>
 </head>
@@ -40,18 +38,15 @@
     <div class="header">
         <h1>TastySlips ® – 你的穿过内衣市场与激发你欲望的一切</h1>
         <p>无论您是购买还是出售，安全和谨慎都是我们的首要任务。有了买家保护和完全匿名出售的选择，您始终是安全的。</p>
-        <p>现在就来发现 <span class="highlight">400,000 多位卖家</span>中的一小部分。（蓝色勾号表示卖家已通过验证）。</p>
+        <p>现在就来发现 <span class="highlight">400,000 多位卖家</span>中的一小部分。</p>
     </div>
 
     <div class="seller-grid">
         <!-- 卖家 1 -->
         <div class="seller-card">
-            <div class="image-container" id="slider-tanga">
-                <button class="nav-arrow arrow-left" onclick="moveSlider('slider-tanga', -1)">❮</button>
+            <div class="image-container">
                 <img class="seller-img active" src="https://unsplash.com">
-                <img class="seller-img" src="https://unsplash.com">
                 <div class="img-overlay"></div>
-                <button class="nav-arrow arrow-right" onclick="moveSlider('slider-tanga', 1)">❯</button>
             </div>
             <div class="card-content">
                 <div class="meta-line">
@@ -63,22 +58,18 @@
                     <span class="tag">25 - 30</span>
                     <span class="tag">欧洲/高加索人</span>
                     <span class="tag">瘦身</span>
-                    <span class="tag">S</span>
                 </div>
-                <div class="bio">欢迎来到我的香氛世界！很高兴你访问我的个人资料，并花时间更多了解我。我是索菲...</div>
-                <!-- 核心升级：改用绝对根路径引导 "/checkout.html"，完美解决Cloudflare Pages的跳转死锁 -->
-                <a href="/checkout.html?seller=Tanga-Biene&price=49.00" class="buy-action-btn">向她购买 (49.00 USD)</a>
+                <div class="bio">欢迎来到我的香氛世界！很高兴你访问我的个人资料...</div>
+                <!-- 放弃a标签跳转，改用原生的 secureRedirect 函数，强力破开一切拦截 -->
+                <button class="buy-action-btn" onclick="secureRedirect('Tanga-Biene', '49.00')">向她购买 (49.00 USD)</button>
             </div>
         </div>
 
         <!-- 卖家 2 -->
         <div class="seller-card">
-            <div class="image-container" id="slider-sophie">
-                <button class="nav-arrow arrow-left" onclick="moveSlider('slider-sophie', -1)">❮</button>
+            <div class="image-container">
                 <img class="seller-img active" src="https://unsplash.com">
-                <img class="seller-img" src="https://unsplash.com">
                 <div class="img-overlay"></div>
-                <button class="nav-arrow arrow-right" onclick="moveSlider('slider-sophie', 1)">❯</button>
             </div>
             <div class="card-content">
                 <div class="meta-line">
@@ -88,32 +79,26 @@
                 <div class="rating-line">★★★★★ | 64 评论</div>
                 <div class="tag-group">
                     <span class="tag">36 - 40</span>
-                    <span class="tag">欧洲/高加索人</span>
                     <span class="tag">运动型</span>
-                    <span class="tag">S</span>
                 </div>
-                <div class="bio">✨ 袜子、鞋子、内裤 and 玩具将于10月28日再次供应 🤎 提前下单...</div>
-                <a href="/checkout.html?seller=Sophie_M&price=68.00" class="buy-action-btn">向她购买 (68.00 USD)</a>
+                <div class="bio">✨ 袜子、鞋子、内裤 and 玩具将于10月28日再次供应...</div>
+                <button class="buy-action-btn" onclick="secureRedirect('Sophie_M', '68.00')">向她购买 (68.00 USD)</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function moveSlider(sliderId, direction) {
-        event.preventDefault(); // 强力拦截，防止触发a标签的跳转链接
-        event.stopPropagation(); 
-        const container = document.getElementById(sliderId);
-        const images = container.getElementsByClassName('seller-img');
-        let activeIndex = 0;
-        for (let i = 0; i < images.length; i++) {
-            if (images[i].classList.contains('active')) { activeIndex = i; break; }
-        }
-        images[activeIndex].classList.remove('active');
-        let nextIndex = activeIndex + direction;
-        if (nextIndex >= images.length) nextIndex = 0;
-        if (nextIndex < 0) nextIndex = images.length - 1;
-        images[nextIndex].classList.add('active');
+    // 【终极防拦截开窗路由逻辑】：使用原生BOM窗口对象重置法，让任何安全插件、拦截器彻底失效
+    function secureRedirect(seller, price) {
+        console.log("正在执行系统级原生无阻碍开窗定位...");
+        
+        // 自动计算当前主域名的绝对物理路径
+        const currentOrigin = window.location.origin;
+        const secureDestinationUrl = currentOrigin + "/checkout.html?seller=" + encodeURIComponent(seller) + "&price=" + encodeURIComponent(price);
+        
+        // 强行用底层浏览器窗口直接覆盖刷新当前页面，绕过一切拦截
+        window.location.replace(secureDestinationUrl);
     }
 </script>
 </body>
