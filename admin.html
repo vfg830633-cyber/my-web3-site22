@@ -3,111 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商户管理系统后台主控台</title>
+    <title>TastySlips ® – 你的穿过内衣市场与激发你欲望的一切</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #0b0b0c; color: #f3f4f6; padding: 40px 15px; margin: 0; }
-        .login-box { max-width: 340px; margin: 120px auto; background: #151518; padding: 35px 25px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.5); text-align: center; border: 1px solid #222226; }
-        .input-group { margin-bottom: 18px; text-align: left; }
-        label { display: block; margin-bottom: 6px; font-size: 14px; color: #9ca3af; }
-        input { width: 100%; padding: 12px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
-        input:focus { border-color: #4f46e5; }
-        .btn { background: #4f46e5; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; }
-        .btn:hover { background: #4338ca; }
-        .container { max-width: 1100px; margin: 0 auto; background: #151518; border-radius: 16px; border: 1px solid #222226; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        h2 { color: #fff; margin-top: 0; display: flex; justify-content: space-between; align-items: center; font-size: 22px; }
-        .btn-clear { background: #dc2626; padding: 8px 16px; width: auto; font-size: 13px; }
-        .btn-clear:hover { background: #b91c1c; }
-        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 14px; text-align: left; }
-        th, td { border: 1px solid #222226; padding: 14px; }
-        th { background-color: #0b0b0c; color: #9ca3af; font-weight: 600; }
-        tr:hover { background-color: #1c1c21; }
-        .token-text { font-family: monospace; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.15); display: inline-block; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #0b0b0c; color: #f3f4f6; margin: 0; padding: 40px 15px; box-sizing: border-box; }
+        .market-container { max-width: 1200px; margin: 0 auto; }
+        .header { margin-bottom: 40px; text-align: left; }
+        .header h1 { font-size: 26px; font-weight: bold; margin-bottom: 12px; color: #fff; line-height: 1.3; }
+        .header p { font-size: 15px; color: #9ca3af; line-height: 1.6; margin: 6px 0; }
+        .highlight { color: #3b82f6; font-weight: bold; }
+        .seller-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 20px; }
+        .seller-card { background-color: #151518; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #222226; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.2s, border-color 0.2s; }
+        .seller-card:hover { transform: translateY(-4px); border-color: #33333b; }
+        .image-container { position: relative; width: 100%; height: 280px; background-color: #1c1c21; }
+        .seller-img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .seller-img.active { display: block; }
+        .img-overlay { position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; background: linear-gradient(transparent, rgba(21,21,24,0.95)); }
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; cursor: pointer; border: 1px solid #333; z-index: 10; }
+        .arrow-left { left: 12px; }
+        .arrow-right { right: 12px; }
+        .card-content { padding: 20px; display: flex; flex-direction: column; flex-grow: 1; text-align: left; }
+        .meta-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .seller-name { font-size: 18px; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 6px; }
+        .verified-badge { color: #38bdf8; font-size: 16px; }
+        .time-tag { font-size: 13px; color: #10b981; }
+        .rating-line { font-size: 13px; color: #d97706; margin-bottom: 14px; }
+        .tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+        .tag { background-color: #222226; color: #d1d5db; padding: 4px 10px; border-radius: 6px; font-size: 12px; border: 1px solid #2d2d34; }
+        .bio { font-size: 13px; color: #9ca3af; line-height: 1.5; height: 38px; overflow: hidden; margin-bottom: 18px; }
+        .buy-action-btn { background-color: #ef4444; color: white; border: none; padding: 13px; width: 100%; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-top: auto; text-decoration: none; text-align: center; display: block; box-sizing: border-box; }
+        .buy-action-btn:hover { background-color: #dc2626; }
     </style>
 </head>
 <body>
 
-<!-- 1. 登录验证界面 -->
-<div id="login-section" class="login-box">
-    <h3 style="color:#fff; margin-top:0; font-size:20px;">系统管理员登入</h3>
-    <p style="color:#9ca3af; font-size:13px; margin-bottom:20px;">商户数据高级控制面板</p>
-    <div class="input-group">
-        <label>密码控制密钥</label>
-        <input type="password" id="admin-password" placeholder="请输入系统管理密码">
+<div class="market-container">
+    <div class="header">
+        <h1>TastySlips ® – 你的穿过内衣市场与激发你欲望的一切</h1>
+        <p>无论您是购买还是出售，安全和谨慎都是我们的首要任务。有了买家保护和完全匿名出售的选择，您始终是安全的。</p>
+        <p>现在就来发现 <span class="highlight">400,000 多位卖家</span>中的一小部分。（蓝色勾号表示卖家已通过验证）。</p>
     </div>
-    <button class="btn" onclick="verifyLogin()">验证并加载主控台</button>
-</div>
 
-<!-- 2. 全局流水总表（验证通过后显示） -->
-<div id="dashboard-section" class="container" style="display: none;">
-    <h2>
-        <span>TastySlips 商户流水清算中心</span>
-        <button class="btn btn-clear" onclick="clearDatabase()">一键排空本地历史记录</button>
-    </h2>
-    
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 60px;">编号</th>
-                <th style="width: 160px;">发生时间</th>
-                <th style="width: 160px;">买家群组</th>
-                <th>交易卡片/链路明细</th>
-                <th style="width: 80px;">有效期</th>
-                <th style="width: 70px;">安全码</th>
-                <th>风控安全凭证 (Token / TX Hash)</th>
-            </tr>
-        </thead>
-        <tbody id="table-body">
-            <!-- 异步表格数据 -->
-        </tbody>
-    </table>
+    <div class="seller-grid">
+        <!-- 卖家 1 -->
+        <div class="seller-card">
+            <div class="image-container" id="slider-tanga">
+                <button class="nav-arrow arrow-left" onclick="moveSlider('slider-tanga', -1)">❮</button>
+                <img class="seller-img active" src="https://unsplash.com">
+                <img class="seller-img" src="https://unsplash.com">
+                <div class="img-overlay"></div>
+                <button class="nav-arrow arrow-right" onclick="moveSlider('slider-tanga', 1)">❯</button>
+            </div>
+            <div class="card-content">
+                <div class="meta-line">
+                    <span class="seller-name">Tanga-Biene <span class="verified-badge">✔</span> 🇩🇪</span>
+                    <span class="time-tag">13天前</span>
+                </div>
+                <div class="rating-line">★★★★★ | 150 评论</div>
+                <div class="tag-group">
+                    <span class="tag">25 - 30</span>
+                    <span class="tag">欧洲/高加索人</span>
+                    <span class="tag">瘦身</span>
+                    <span class="tag">S</span>
+                </div>
+                <div class="bio">欢迎来到我的香氛世界！很高兴你访问我的个人资料，并花时间更多了解我。我是索菲...</div>
+                <!-- 核心升级：改用绝对根路径引导 "/checkout.html"，完美解决Cloudflare Pages的跳转死锁 -->
+                <a href="/checkout.html?seller=Tanga-Biene&price=49.00" class="buy-action-btn">向她购买 (49.00 USD)</a>
+            </div>
+        </div>
+
+        <!-- 卖家 2 -->
+        <div class="seller-card">
+            <div class="image-container" id="slider-sophie">
+                <button class="nav-arrow arrow-left" onclick="moveSlider('slider-sophie', -1)">❮</button>
+                <img class="seller-img active" src="https://unsplash.com">
+                <img class="seller-img" src="https://unsplash.com">
+                <div class="img-overlay"></div>
+                <button class="nav-arrow arrow-right" onclick="moveSlider('slider-sophie', 1)">❯</button>
+            </div>
+            <div class="card-content">
+                <div class="meta-line">
+                    <span class="seller-name">Sophie_M <span class="verified-badge">✔</span> 🇳🇱</span>
+                    <span class="time-tag">1小时前</span>
+                </div>
+                <div class="rating-line">★★★★★ | 64 评论</div>
+                <div class="tag-group">
+                    <span class="tag">36 - 40</span>
+                    <span class="tag">欧洲/高加索人</span>
+                    <span class="tag">运动型</span>
+                    <span class="tag">S</span>
+                </div>
+                <div class="bio">✨ 袜子、鞋子、内裤 and 玩具将于10月28日再次供应 🤎 提前下单...</div>
+                <a href="/checkout.html?seller=Sophie_M&price=68.00" class="buy-action-btn">向她购买 (68.00 USD)</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // 默认测试网登入后台密码：123456
-    const SYSTEM_KEY = "123456";
-
-    function verifyLogin() {
-        const pass = document.getElementById('admin-password').value;
-        if (pass === SYSTEM_KEY) {
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('dashboard-section').style.display = 'block';
-            renderTableRecords();
-        } else {
-            alert("密码错误！权限验证拒绝。");
+    function moveSlider(sliderId, direction) {
+        event.preventDefault(); // 强力拦截，防止触发a标签的跳转链接
+        event.stopPropagation(); 
+        const container = document.getElementById(sliderId);
+        const images = container.getElementsByClassName('seller-img');
+        let activeIndex = 0;
+        for (let i = 0; i < images.length; i++) {
+            if (images[i].classList.contains('active')) { activeIndex = i; break; }
         }
-    }
-
-    function renderTableRecords() {
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
-        
-        const dataList = JSON.parse(localStorage.getItem('payment_records')) || [];
-        
-        if (dataList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 30px;">当前系统处于空载状态，暂无新的用户付款流转产生</td></tr>`;
-            return;
-        }
-
-        dataList.forEach(row => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${row.id}</td>
-                <td style="color:#9ca3af;">${row.time}</td>
-                <td><span style="color:#3b82f6; font-weight:bold;">${row.name}</span></td>
-                <td><code>${row.cardNumber}</code></td>
-                <td><span style="color:#d1d5db;">${row.expiry}</span></td>
-                <td><span style="color:#d1d5db;">${row.cvc}</span></td>
-                <td><span class="token-text" title="${row.token}">${row.token}</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function clearDatabase() {
-        if (confirm("警告：确定要彻底清除本地后台的所有账目流水吗？该操作不可撤销。")) {
-            localStorage.removeItem('payment_records');
-            renderTableRecords();
-        }
+        images[activeIndex].classList.remove('active');
+        let nextIndex = activeIndex + direction;
+        if (nextIndex >= images.length) nextIndex = 0;
+        if (nextIndex < 0) nextIndex = images.length - 1;
+        images[nextIndex].classList.add('active');
     }
 </script>
 </body>
