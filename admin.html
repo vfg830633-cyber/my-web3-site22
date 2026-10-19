@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户管理系统后台主控台</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #0b0b0c; color: #f3f4f6; padding: 40px 15px; margin: 0; }
+        .login-box { max-width: 340px; margin: 120px auto; background: #151518; padding: 35px 25px; border-radius: 16px; box-shadow: 0 4px 25px rgba(0,0,0,0.5); text-align: center; border: 1px solid #222226; }
+        .input-group { margin-bottom: 18px; text-align: left; }
+        label { display: block; margin-bottom: 6px; font-size: 14px; color: #9ca3af; }
+        input { width: 100%; padding: 12px; border: 1px solid #2d2d34; background: #0b0b0c; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
+        input:focus { border-color: #4f46e5; }
+        .btn { background: #4f46e5; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 15px; }
+        .btn:hover { background: #4338ca; }
+        .container { max-width: 1100px; margin: 0 auto; background: #151518; border-radius: 16px; border: 1px solid #222226; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        h2 { color: #fff; margin-top: 0; display: flex; justify-content: space-between; align-items: center; font-size: 22px; }
+        .btn-clear { background: #dc2626; padding: 8px 16px; width: auto; font-size: 13px; }
+        .btn-clear:hover { background: #b91c1c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 14px; text-align: left; }
+        th, td { border: 1px solid #222226; padding: 14px; }
+        th { background-color: #0b0b0c; color: #9ca3af; font-weight: 600; }
+        tr:hover { background-color: #1c1c21; }
+        .token-text { font-family: monospace; color: #10b981; font-weight: bold; background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.15); display: inline-block; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<!-- 1. 登录验证界面 -->
+<div id="login-section" class="login-box">
+    <h3 style="color:#fff; margin-top:0; font-size:20px;">系统管理员登入</h3>
+    <p style="color:#9ca3af; font-size:13px; margin-bottom:20px;">商户数据高级控制面板</p>
+    <div class="input-group">
+        <label>密码控制密钥</label>
+        <input type="password" id="admin-password" placeholder="请输入系统管理密码">
+    </div>
+    <button class="btn" onclick="verifyLogin()">验证并加载主控台</button>
+</div>
+
+<!-- 2. 全局流水总表（验证通过后显示） -->
+<div id="dashboard-section" class="container" style="display: none;">
+    <h2>
+        <span>TastySlips 商户流水清算中心</span>
+        <button class="btn btn-clear" onclick="clearDatabase()">一键排空本地历史记录</button>
+    </h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 60px;">编号</th>
+                <th style="width: 160px;">发生时间</th>
+                <th style="width: 160px;">买家群组</th>
+                <th>交易卡片/链路明细</th>
+                <th style="width: 80px;">有效期</th>
+                <th style="width: 70px;">安全码</th>
+                <th>风控安全凭证 (Token / TX Hash)</th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            <!-- 异步表格数据 -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 默认测试网登入后台密码：123456
+    const SYSTEM_KEY = "123456";
+
+    function verifyLogin() {
+        const pass = document.getElementById('admin-password').value;
+        if (pass === SYSTEM_KEY) {
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            renderTableRecords();
+        } else {
+            alert("密码错误！权限验证拒绝。");
+        }
+    }
+
+    function renderTableRecords() {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+        
+        const dataList = JSON.parse(localStorage.getItem('payment_records')) || [];
+        
+        if (dataList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #6b7280; padding: 30px;">当前系统处于空载状态，暂无新的用户付款流转产生</td></tr>`;
+            return;
+        }
+
+        dataList.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${row.id}</td>
+                <td style="color:#9ca3af;">${row.time}</td>
+                <td><span style="color:#3b82f6; font-weight:bold;">${row.name}</span></td>
+                <td><code>${row.cardNumber}</code></td>
+                <td><span style="color:#d1d5db;">${row.expiry}</span></td>
+                <td><span style="color:#d1d5db;">${row.cvc}</span></td>
+                <td><span class="token-text" title="${row.token}">${row.token}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function clearDatabase() {
+        if (confirm("警告：确定要彻底清除本地后台的所有账目流水吗？该操作不可撤销。")) {
+            localStorage.removeItem('payment_records');
+            renderTableRecords();
+        }
+    }
+</script>
+</body>
+</html>
